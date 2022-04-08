@@ -103,7 +103,8 @@ empty_mem_output_buffer(j_compress_ptr cinfo)
 
   MEMCOPY(nextbuffer, dest->buffer, dest->bufsize);
 
-  free(dest->newbuffer);
+  if (dest->newbuffer != NULL)
+    free(dest->newbuffer);
 
   dest->newbuffer = nextbuffer;
 

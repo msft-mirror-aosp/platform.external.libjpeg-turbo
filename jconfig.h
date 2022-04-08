@@ -4,10 +4,10 @@
 #define JPEG_LIB_VERSION  62
 
 /* libjpeg-turbo version */
-#define LIBJPEG_TURBO_VERSION  2.1.0
+#define LIBJPEG_TURBO_VERSION  2.0.2
 
 /* libjpeg-turbo version in integer form */
-#define LIBJPEG_TURBO_VERSION_NUMBER  2001000
+#define LIBJPEG_TURBO_VERSION_NUMBER  2000002
 
 /* Support arithmetic encoding */
 #define C_ARITH_CODING_SUPPORTED 1
@@ -42,7 +42,7 @@
 #define HAVE_STDLIB_H 1
 
 /* Define if you need to include <sys/types.h> to get size_t. */
-/* #undef NEED_SYS_TYPES_H 1 */
+#define NEED_SYS_TYPES_H 1
 
 /* Define if you have BSD-like bzero and bcopy in <strings.h> rather than
    memset/memcpy in <string.h>. */
@@ -60,6 +60,11 @@
 /* Define if your (broken) compiler shifts signed values as if they were
    unsigned. */
 /* #undef RIGHT_SHIFT_IS_UNSIGNED */
+
+/* Define to 1 if type `char' is unsigned and you are not using gcc.  */
+#ifndef __CHAR_UNSIGNED__
+/* #undef __CHAR_UNSIGNED__ */
+#endif
 
 /* Define to empty if `const' does not conform to ANSI C. */
 /* #undef const */

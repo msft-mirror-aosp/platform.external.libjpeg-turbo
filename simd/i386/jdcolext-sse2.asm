@@ -13,6 +13,8 @@
 ; assembler (including Borland's Turbo Assembler).
 ; NASM is available from http://nasm.sourceforge.net/ or
 ; http://sourceforge.net/project/showfiles.php?group_id=6208
+;
+; [TAB8]
 
 %include "jcolsamp.inc"
 
@@ -318,7 +320,7 @@ EXTN(jsimd_ycc_rgb_convert_sse2):
     movd        eax, xmmA
     cmp         ecx, byte SIZEOF_WORD
     jb          short .column_st1
-    mov         word [edi], ax
+    mov         WORD [edi], ax
     add         edi, byte SIZEOF_WORD
     sub         ecx, byte SIZEOF_WORD
     shr         eax, 16
@@ -327,7 +329,7 @@ EXTN(jsimd_ycc_rgb_convert_sse2):
     ; space.
     test        ecx, ecx
     jz          short .nextrow
-    mov         byte [edi], al
+    mov         BYTE [edi], al
 
 %else  ; RGB_PIXELSIZE == 4 ; -----------
 

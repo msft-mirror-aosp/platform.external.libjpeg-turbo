@@ -3,7 +3,6 @@
 ;
 ; Copyright 2009, 2012 Pierre Ossman <ossman@cendio.se> for Cendio AB
 ; Copyright (C) 2009, 2012, 2016, D. R. Commander.
-; Copyright (C) 2018, Matthias Räncker.
 ;
 ; Based on the x86 SIMD extension for IJG JPEG library
 ; Copyright (C) 1999-2006, MIYASAKA Masaru.
@@ -14,6 +13,8 @@
 ; assembler (including Borland's Turbo Assembler).
 ; NASM is available from http://nasm.sourceforge.net/ or
 ; http://sourceforge.net/project/showfiles.php?group_id=6208
+;
+; [TAB8]
 
 %include "jcolsamp.inc"
 
@@ -58,14 +59,14 @@ EXTN(jsimd_h2v1_merged_upsample_sse2):
 
     mov         rdi, r11
     mov         ecx, r12d
-    mov         rsip, JSAMPARRAY [rdi+0*SIZEOF_JSAMPARRAY]
-    mov         rbxp, JSAMPARRAY [rdi+1*SIZEOF_JSAMPARRAY]
-    mov         rdxp, JSAMPARRAY [rdi+2*SIZEOF_JSAMPARRAY]
+    mov         rsi, JSAMPARRAY [rdi+0*SIZEOF_JSAMPARRAY]
+    mov         rbx, JSAMPARRAY [rdi+1*SIZEOF_JSAMPARRAY]
+    mov         rdx, JSAMPARRAY [rdi+2*SIZEOF_JSAMPARRAY]
     mov         rdi, r13
-    mov         rsip, JSAMPROW [rsi+rcx*SIZEOF_JSAMPROW]  ; inptr0
-    mov         rbxp, JSAMPROW [rbx+rcx*SIZEOF_JSAMPROW]  ; inptr1
-    mov         rdxp, JSAMPROW [rdx+rcx*SIZEOF_JSAMPROW]  ; inptr2
-    mov         rdip, JSAMPROW [rdi]                      ; outptr
+    mov         rsi, JSAMPROW [rsi+rcx*SIZEOF_JSAMPROW]  ; inptr0
+    mov         rbx, JSAMPROW [rbx+rcx*SIZEOF_JSAMPROW]  ; inptr1
+    mov         rdx, JSAMPROW [rdx+rcx*SIZEOF_JSAMPROW]  ; inptr2
+    mov         rdi, JSAMPROW [rdi]                      ; outptr
 
     pop         rcx                     ; col
 
@@ -309,7 +310,7 @@ EXTN(jsimd_h2v1_merged_upsample_sse2):
     movd        eax, xmmA
     cmp         rcx, byte SIZEOF_WORD
     jb          short .column_st1
-    mov         word [rdi], ax
+    mov         WORD [rdi], ax
     add         rdi, byte SIZEOF_WORD
     sub         rcx, byte SIZEOF_WORD
     shr         rax, 16
@@ -318,7 +319,7 @@ EXTN(jsimd_h2v1_merged_upsample_sse2):
     ; space.
     test        rcx, rcx
     jz          short .endcolumn
-    mov         byte [rdi], al
+    mov         BYTE [rdi], al
 
 %else  ; RGB_PIXELSIZE == 4 ; -----------
 
@@ -457,16 +458,15 @@ EXTN(jsimd_h2v2_merged_upsample_sse2):
 
     mov         rdi, r11
     mov         ecx, r12d
-    mov         rsip, JSAMPARRAY [rdi+0*SIZEOF_JSAMPARRAY]
-    mov         rbxp, JSAMPARRAY [rdi+1*SIZEOF_JSAMPARRAY]
-    mov         rdxp, JSAMPARRAY [rdi+2*SIZEOF_JSAMPARRAY]
+    mov         rsi, JSAMPARRAY [rdi+0*SIZEOF_JSAMPARRAY]
+    mov         rbx, JSAMPARRAY [rdi+1*SIZEOF_JSAMPARRAY]
+    mov         rdx, JSAMPARRAY [rdi+2*SIZEOF_JSAMPARRAY]
     mov         rdi, r13
     lea         rsi, [rsi+rcx*SIZEOF_JSAMPROW]
 
-    sub         rsp, SIZEOF_JSAMPARRAY*4
-    mov         JSAMPARRAY [rsp+0*SIZEOF_JSAMPARRAY], rsip  ; intpr00
-    mov         JSAMPARRAY [rsp+1*SIZEOF_JSAMPARRAY], rbxp  ; intpr1
-    mov         JSAMPARRAY [rsp+2*SIZEOF_JSAMPARRAY], rdxp  ; intpr2
+    push        rdx                     ; inptr2
+    push        rbx                     ; inptr1
+    push        rsi                     ; inptr00
     mov         rbx, rsp
 
     push        rdi
@@ -490,16 +490,16 @@ EXTN(jsimd_h2v2_merged_upsample_sse2):
     pop         rax
     pop         rcx
     pop         rdi
-    mov         rsip, JSAMPARRAY [rsp+0*SIZEOF_JSAMPARRAY]
-    mov         rbxp, JSAMPARRAY [rsp+1*SIZEOF_JSAMPARRAY]
-    mov         rdxp, JSAMPARRAY [rsp+2*SIZEOF_JSAMPARRAY]
+    pop         rsi
+    pop         rbx
+    pop         rdx
 
     add         rdi, byte SIZEOF_JSAMPROW  ; outptr1
     add         rsi, byte SIZEOF_JSAMPROW  ; inptr01
 
-    mov         JSAMPARRAY [rsp+0*SIZEOF_JSAMPARRAY], rsip  ; intpr00
-    mov         JSAMPARRAY [rsp+1*SIZEOF_JSAMPARRAY], rbxp  ; intpr1
-    mov         JSAMPARRAY [rsp+2*SIZEOF_JSAMPARRAY], rdxp  ; intpr2
+    push        rdx                     ; inptr2
+    push        rbx                     ; inptr1
+    push        rsi                     ; inptr00
     mov         rbx, rsp
 
     push        rdi
@@ -523,10 +523,9 @@ EXTN(jsimd_h2v2_merged_upsample_sse2):
     pop         rax
     pop         rcx
     pop         rdi
-    mov         rsip, JSAMPARRAY [rsp+0*SIZEOF_JSAMPARRAY]
-    mov         rbxp, JSAMPARRAY [rsp+1*SIZEOF_JSAMPARRAY]
-    mov         rdxp, JSAMPARRAY [rsp+2*SIZEOF_JSAMPARRAY]
-    add         rsp, SIZEOF_JSAMPARRAY*4
+    pop         rsi
+    pop         rbx
+    pop         rdx
 
     pop         rbx
     uncollect_args 4

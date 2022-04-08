@@ -3,7 +3,6 @@
 ;
 ; Copyright (C) 2009, 2016, D. R. Commander.
 ; Copyright (C) 2015, Intel Corporation.
-; Copyright (C) 2018, Matthias Räncker.
 ;
 ; Based on the x86 SIMD extension for IJG JPEG library
 ; Copyright (C) 1999-2006, MIYASAKA Masaru.
@@ -14,6 +13,8 @@
 ; assembler (including Borland's Turbo Assembler).
 ; NASM is available from http://nasm.sourceforge.net/ or
 ; http://sourceforge.net/project/showfiles.php?group_id=6208
+;
+; [TAB8]
 
 %include "jcolsamp.inc"
 
@@ -58,9 +59,9 @@ EXTN(jsimd_rgb_ycc_convert_avx2):
 
     mov         rsi, r12
     mov         ecx, r13d
-    mov         rdip, JSAMPARRAY [rsi+0*SIZEOF_JSAMPARRAY]
-    mov         rbxp, JSAMPARRAY [rsi+1*SIZEOF_JSAMPARRAY]
-    mov         rdxp, JSAMPARRAY [rsi+2*SIZEOF_JSAMPARRAY]
+    mov         rdi, JSAMPARRAY [rsi+0*SIZEOF_JSAMPARRAY]
+    mov         rbx, JSAMPARRAY [rsi+1*SIZEOF_JSAMPARRAY]
+    mov         rdx, JSAMPARRAY [rsi+2*SIZEOF_JSAMPARRAY]
     lea         rdi, [rdi+rcx*SIZEOF_JSAMPROW]
     lea         rbx, [rbx+rcx*SIZEOF_JSAMPROW]
     lea         rdx, [rdx+rcx*SIZEOF_JSAMPROW]
@@ -78,10 +79,10 @@ EXTN(jsimd_rgb_ycc_convert_avx2):
     push        rsi
     push        rcx                     ; col
 
-    mov         rsip, JSAMPROW [rsi]    ; inptr
-    mov         rdip, JSAMPROW [rdi]    ; outptr0
-    mov         rbxp, JSAMPROW [rbx]    ; outptr1
-    mov         rdxp, JSAMPROW [rdx]    ; outptr2
+    mov         rsi, JSAMPROW [rsi]     ; inptr
+    mov         rdi, JSAMPROW [rdi]     ; outptr0
+    mov         rbx, JSAMPROW [rbx]     ; outptr1
+    mov         rdx, JSAMPROW [rdx]     ; outptr2
 
     cmp         rcx, byte SIZEOF_YMMWORD
     jae         near .columnloop
@@ -95,12 +96,12 @@ EXTN(jsimd_rgb_ycc_convert_avx2):
     test        cl, SIZEOF_BYTE
     jz          short .column_ld2
     sub         rcx, byte SIZEOF_BYTE
-    movzx       rax, byte [rsi+rcx]
+    movzx       rax, BYTE [rsi+rcx]
 .column_ld2:
     test        cl, SIZEOF_WORD
     jz          short .column_ld4
     sub         rcx, byte SIZEOF_WORD
-    movzx       rdx, word [rsi+rcx]
+    movzx       rdx, WORD [rsi+rcx]
     shl         rax, WORD_BIT
     or          rax, rdx
 .column_ld4:

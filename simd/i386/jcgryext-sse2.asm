@@ -12,6 +12,8 @@
 ; assembler (including Borland's Turbo Assembler).
 ; NASM is available from http://nasm.sourceforge.net/ or
 ; http://sourceforge.net/project/showfiles.php?group_id=6208
+;
+; [TAB8]
 
 %include "jcolsamp.inc"
 
@@ -99,12 +101,12 @@ EXTN(jsimd_rgb_gray_convert_sse2):
     test        cl, SIZEOF_BYTE
     jz          short .column_ld2
     sub         ecx, byte SIZEOF_BYTE
-    movzx       eax, byte [esi+ecx]
+    movzx       eax, BYTE [esi+ecx]
 .column_ld2:
     test        cl, SIZEOF_WORD
     jz          short .column_ld4
     sub         ecx, byte SIZEOF_WORD
-    movzx       edx, word [esi+ecx]
+    movzx       edx, WORD [esi+ecx]
     shl         eax, WORD_BIT
     or          eax, edx
 .column_ld4:

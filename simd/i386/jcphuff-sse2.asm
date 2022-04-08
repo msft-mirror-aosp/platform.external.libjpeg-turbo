@@ -15,6 +15,8 @@
 ;
 ; This file contains an SSE2 implementation of data preparation for progressive
 ; Huffman encoding.  See jcphuff.c for more details.
+;
+; [TAB8]
 
 %include "jsimdext.inc"
 
@@ -523,8 +525,6 @@ EXTN(jsimd_encode_mcu_AC_refine_prepare_sse2):
     add         KK, 2
     dec         K
     jnz         .BLOOPR16
-    test        LEN, 15
-    je          .PADDINGR
 .ELOOPR16:
     mov         LENEND, LEN
 

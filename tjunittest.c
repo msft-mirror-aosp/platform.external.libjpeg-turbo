@@ -46,7 +46,6 @@
 #endif
 
 
-#ifndef GTEST
 static void usage(char *progName)
 {
   printf("\nUSAGE: %s [options]\n\n", progName);
@@ -58,46 +57,43 @@ static void usage(char *progName)
   printf("-bmp = tjLoadImage()/tjSaveImage() unit test\n\n");
   exit(1);
 }
-#endif
 
 
 #define THROW_TJ() { \
-  fprintf(stderr, "TurboJPEG ERROR:\n%s\n", tjGetErrorStr()); \
+  printf("TurboJPEG ERROR:\n%s\n", tjGetErrorStr()); \
   BAILOUT() \
 }
 #define TRY_TJ(f) { if ((f) == -1) THROW_TJ(); }
 #define THROW(m) { printf("ERROR: %s\n", m);  BAILOUT() }
 #define THROW_MD5(filename, md5sum, ref) { \
-  fprintf(stderr, "\n%s has an MD5 sum of %s.\n   Should be %s.\n", filename, \
-          md5sum, ref); \
+  printf("\n%s has an MD5 sum of %s.\n   Should be %s.\n", filename, md5sum, \
+         ref); \
   BAILOUT() \
 }
 
-static const char *subNameLong[TJ_NUMSAMP] = {
+const char *subNameLong[TJ_NUMSAMP] = {
   "4:4:4", "4:2:2", "4:2:0", "GRAY", "4:4:0", "4:1:1"
 };
-static const char *subName[TJ_NUMSAMP] = {
+const char *subName[TJ_NUMSAMP] = {
   "444", "422", "420", "GRAY", "440", "411"
 };
 
-static const char *pixFormatStr[TJ_NUMPF] = {
+const char *pixFormatStr[TJ_NUMPF] = {
   "RGB", "BGR", "RGBX", "BGRX", "XBGR", "XRGB", "Grayscale",
   "RGBA", "BGRA", "ABGR", "ARGB", "CMYK"
 };
 
-static const int _3byteFormats[] = { TJPF_RGB, TJPF_BGR };
-static const int _4byteFormats[] = {
+const int _3byteFormats[] = { TJPF_RGB, TJPF_BGR };
+const int _4byteFormats[] = {
   TJPF_RGBX, TJPF_BGRX, TJPF_XBGR, TJPF_XRGB, TJPF_CMYK
 };
-static const int _onlyGray[] = { TJPF_GRAY };
-static const int _onlyRGB[] = { TJPF_RGB };
+const int _onlyGray[] = { TJPF_GRAY };
+const int _onlyRGB[] = { TJPF_RGB };
 
-static int doYUV = 0, alloc = 0, pad = 4;
+int doYUV = 0, alloc = 0, pad = 4;
 
-static int exitStatus = 0;
+int exitStatus = 0;
 #define BAILOUT() { exitStatus = -1;  goto bailout; }
-
-static const size_t filePathSize = 1024;
 
 
 static void initBuf(unsigned char *buf, int w, int h, int pf, int flags)
@@ -157,24 +153,22 @@ static void initBuf(unsigned char *buf, int w, int h, int pf, int flags)
 
 #define CHECKVAL(v, cv) { \
   if (v < cv - 1 || v > cv + 1) { \
-    fprintf(stderr, "\nComp. %s at %d,%d should be %d, not %d\n", #v, row, \
-            col, cv, v); \
+    printf("\nComp. %s at %d,%d should be %d, not %d\n", #v, row, col, cv, \
+           v); \
     retval = 0;  exitStatus = -1;  goto bailout; \
   } \
 }
 
 #define CHECKVAL0(v) { \
   if (v > 1) { \
-    fprintf(stderr, "\nComp. %s at %d,%d should be 0, not %d\n", #v, row, \
-            col, v); \
+    printf("\nComp. %s at %d,%d should be 0, not %d\n", #v, row, col, v); \
     retval = 0;  exitStatus = -1;  goto bailout; \
   } \
 }
 
 #define CHECKVAL255(v) { \
   if (v < 254) { \
-    fprintf(stderr, "\nComp. %s at %d,%d should be 255, not %d\n", #v, row, \
-            col, v); \
+    printf("\nComp. %s at %d,%d should be 255, not %d\n", #v, row, col, v); \
     retval = 0;  exitStatus = -1;  goto bailout; \
   } \
 }
@@ -259,16 +253,15 @@ bailout:
     for (row = 0; row < h; row++) {
       for (col = 0; col < w; col++) {
         if (pf == TJPF_CMYK)
-          fprintf(stderr, "%.3d/%.3d/%.3d/%.3d ", buf[(row * w + col) * ps],
-                  buf[(row * w + col) * ps + 1], buf[(row * w + col) * ps + 2],
-                  buf[(row * w + col) * ps + 3]);
+          printf("%.3d/%.3d/%.3d/%.3d ", buf[(row * w + col) * ps],
+                 buf[(row * w + col) * ps + 1], buf[(row * w + col) * ps + 2],
+                 buf[(row * w + col) * ps + 3]);
         else
-          fprintf(stderr, "%.3d/%.3d/%.3d ",
-                  buf[(row * w + col) * ps + roffset],
-                  buf[(row * w + col) * ps + goffset],
-                  buf[(row * w + col) * ps + boffset]);
+          printf("%.3d/%.3d/%.3d ", buf[(row * w + col) * ps + roffset],
+                 buf[(row * w + col) * ps + goffset],
+                 buf[(row * w + col) * ps + boffset]);
       }
-      fprintf(stderr, "\n");
+      printf("\n");
     }
   }
   return retval;
@@ -327,21 +320,21 @@ bailout:
   if (retval == 0) {
     for (row = 0; row < ph; row++) {
       for (col = 0; col < pw; col++)
-        fprintf(stderr, "%.3d ", buf[ypitch * row + col]);
-      fprintf(stderr, "\n");
+        printf("%.3d ", buf[ypitch * row + col]);
+      printf("\n");
     }
-    fprintf(stderr, "\n");
+    printf("\n");
     for (row = 0; row < ch; row++) {
       for (col = 0; col < cw; col++)
-        fprintf(stderr, "%.3d ", buf[ypitch * ph + (uvpitch * row + col)]);
-      fprintf(stderr, "\n");
+        printf("%.3d ", buf[ypitch * ph + (uvpitch * row + col)]);
+      printf("\n");
     }
-    fprintf(stderr, "\n");
+    printf("\n");
     for (row = 0; row < ch; row++) {
       for (col = 0; col < cw; col++)
-        fprintf(stderr, "%.3d ",
-                buf[ypitch * ph + uvpitch * ch + (uvpitch * row + col)]);
-      fprintf(stderr, "\n");
+        printf("%.3d ",
+               buf[ypitch * ph + uvpitch * ch + (uvpitch * row + col)]);
+      printf("\n");
     }
   }
 
@@ -352,16 +345,10 @@ bailout:
 static void writeJPEG(unsigned char *jpegBuf, unsigned long jpegSize,
                       char *filename)
 {
-#if defined(ANDROID) && defined(GTEST)
-  char path[filePathSize];
-  snprintf(path, filePathSize, "/sdcard/%s", filename);
-  FILE *file = fopen(path, "wb");
-#else
   FILE *file = fopen(filename, "wb");
-#endif
+
   if (!file || fwrite(jpegBuf, jpegSize, 1, file) != 1) {
-    fprintf(stderr, "ERROR: Could not write to %s.\n%s\n", filename,
-            strerror(errno));
+    printf("ERROR: Could not write to %s.\n%s\n", filename, strerror(errno));
     BAILOUT()
   }
 
@@ -374,7 +361,7 @@ static void compTest(tjhandle handle, unsigned char **dstBuf,
                      unsigned long *dstSize, int w, int h, int pf,
                      char *basename, int subsamp, int jpegQual, int flags)
 {
-  char tempStr[filePathSize];
+  char tempStr[1024];
   unsigned char *srcBuf = NULL, *yuvBuf = NULL;
   const char *pfStr = pixFormatStr[pf];
   const char *buStrLong =
@@ -399,33 +386,32 @@ static void compTest(tjhandle handle, unsigned char **dstBuf,
       THROW("Memory allocation failure");
     memset(yuvBuf, 0, yuvSize);
 
-    fprintf(stderr, "%s %s -> YUV %s ... ", pfStr, buStrLong,
-            subNameLong[subsamp]);
+    printf("%s %s -> YUV %s ... ", pfStr, buStrLong, subNameLong[subsamp]);
     TRY_TJ(tjEncodeYUV3(handle2, srcBuf, w, 0, h, pf, yuvBuf, pad, subsamp,
                         flags));
     tjDestroy(handle2);
-    if (checkBufYUV(yuvBuf, w, h, subsamp, sf)) fprintf(stderr, "Passed.\n");
-    else fprintf(stderr, "FAILED!\n");
+    if (checkBufYUV(yuvBuf, w, h, subsamp, sf)) printf("Passed.\n");
+    else printf("FAILED!\n");
 
-    fprintf(stderr, "YUV %s %s -> JPEG Q%d ... ", subNameLong[subsamp],
-            buStrLong, jpegQual);
+    printf("YUV %s %s -> JPEG Q%d ... ", subNameLong[subsamp], buStrLong,
+           jpegQual);
     TRY_TJ(tjCompressFromYUV(handle, yuvBuf, w, pad, h, subsamp, dstBuf,
                              dstSize, jpegQual, flags));
   } else {
-    fprintf(stderr, "%s %s -> %s Q%d ... ", pfStr, buStrLong,
-            subNameLong[subsamp], jpegQual);
+    printf("%s %s -> %s Q%d ... ", pfStr, buStrLong, subNameLong[subsamp],
+           jpegQual);
     TRY_TJ(tjCompress2(handle, srcBuf, w, 0, h, pf, dstBuf, dstSize, subsamp,
                        jpegQual, flags));
   }
 
-  snprintf(tempStr, filePathSize, "%s_enc_%s_%s_%s_Q%d.jpg", basename, pfStr,
-           buStr, subName[subsamp], jpegQual);
+  snprintf(tempStr, 1024, "%s_enc_%s_%s_%s_Q%d.jpg", basename, pfStr, buStr,
+           subName[subsamp], jpegQual);
   writeJPEG(*dstBuf, *dstSize, tempStr);
-  fprintf(stderr, "Done.\n  Result in %s\n", tempStr);
+  printf("Done.\n  Result in %s\n", tempStr);
 
 bailout:
-  free(yuvBuf);
-  free(srcBuf);
+  if (yuvBuf) free(yuvBuf);
+  if (srcBuf) free(srcBuf);
 }
 
 
@@ -461,40 +447,39 @@ static void _decompTest(tjhandle handle, unsigned char *jpegBuf,
       THROW("Memory allocation failure");
     memset(yuvBuf, 0, yuvSize);
 
-    fprintf(stderr, "JPEG -> YUV %s ", subNameLong[subsamp]);
+    printf("JPEG -> YUV %s ", subNameLong[subsamp]);
     if (sf.num != 1 || sf.denom != 1)
-      fprintf(stderr, "%d/%d ... ", sf.num, sf.denom);
-    else fprintf(stderr, "... ");
+      printf("%d/%d ... ", sf.num, sf.denom);
+    else printf("... ");
     TRY_TJ(tjDecompressToYUV2(handle, jpegBuf, jpegSize, yuvBuf, scaledWidth,
                               pad, scaledHeight, flags));
     if (checkBufYUV(yuvBuf, scaledWidth, scaledHeight, subsamp, sf))
-      fprintf(stderr, "Passed.\n");
-    else fprintf(stderr, "FAILED!\n");
+      printf("Passed.\n");
+    else printf("FAILED!\n");
 
-    fprintf(stderr, "YUV %s -> %s %s ... ", subNameLong[subsamp],
-            pixFormatStr[pf],
-            (flags & TJFLAG_BOTTOMUP) ? "Bottom-Up" : "Top-Down ");
+    printf("YUV %s -> %s %s ... ", subNameLong[subsamp], pixFormatStr[pf],
+           (flags & TJFLAG_BOTTOMUP) ? "Bottom-Up" : "Top-Down ");
     TRY_TJ(tjDecodeYUV(handle2, yuvBuf, pad, subsamp, dstBuf, scaledWidth, 0,
                        scaledHeight, pf, flags));
     tjDestroy(handle2);
   } else {
-    fprintf(stderr, "JPEG -> %s %s ", pixFormatStr[pf],
-            (flags & TJFLAG_BOTTOMUP) ? "Bottom-Up" : "Top-Down ");
+    printf("JPEG -> %s %s ", pixFormatStr[pf],
+           (flags & TJFLAG_BOTTOMUP) ? "Bottom-Up" : "Top-Down ");
     if (sf.num != 1 || sf.denom != 1)
-      fprintf(stderr, "%d/%d ... ", sf.num, sf.denom);
-    else fprintf(stderr, "... ");
+      printf("%d/%d ... ", sf.num, sf.denom);
+    else printf("... ");
     TRY_TJ(tjDecompress2(handle, jpegBuf, jpegSize, dstBuf, scaledWidth, 0,
                          scaledHeight, pf, flags));
   }
 
   if (checkBuf(dstBuf, scaledWidth, scaledHeight, pf, subsamp, sf, flags))
-    fprintf(stderr, "Passed.");
-  else fprintf(stderr, "FAILED!");
-  fprintf(stderr, "\n");
+    printf("Passed.");
+  else printf("FAILED!");
+  printf("\n");
 
 bailout:
-  free(yuvBuf);
-  free(dstBuf);
+  if (yuvBuf) free(yuvBuf);
+  if (dstBuf) free(dstBuf);
 }
 
 
@@ -553,19 +538,19 @@ static void doTest(int w, int h, const int *formats, int nformats, int subsamp,
                flags);
       decompTest(dhandle, dstBuf, size, w, h, pf, basename, subsamp, flags);
       if (pf >= TJPF_RGBX && pf <= TJPF_XRGB) {
-        fprintf(stderr, "\n");
+        printf("\n");
         decompTest(dhandle, dstBuf, size, w, h, pf + (TJPF_RGBA - TJPF_RGBX),
                    basename, subsamp, flags);
       }
-      fprintf(stderr, "\n");
+      printf("\n");
     }
   }
-  fprintf(stderr, "--------------------\n\n");
+  printf("--------------------\n\n");
 
 bailout:
   if (chandle) tjDestroy(chandle);
   if (dhandle) tjDestroy(dhandle);
-  tjFree(dstBuf);
+  if (dstBuf) tjFree(dstBuf);
 }
 
 
@@ -582,7 +567,6 @@ bailout:
 }
 #endif
 
-#ifndef GTEST
 static void overflowTest(void)
 {
   /* Ensure that the various buffer size functions don't overflow */
@@ -604,7 +588,6 @@ static void overflowTest(void)
 bailout:
   return;
 }
-#endif
 
 
 static void bufSizeTest(void)
@@ -616,14 +599,13 @@ static void bufSizeTest(void)
 
   if ((handle = tjInitCompress()) == NULL) THROW_TJ();
 
-  fprintf(stderr, "Buffer size regression test\n");
+  printf("Buffer size regression test\n");
   for (subsamp = 0; subsamp < TJ_NUMSAMP; subsamp++) {
     for (w = 1; w < 48; w++) {
       int maxh = (w == 1) ? 2048 : 48;
 
       for (h = 1; h < maxh; h++) {
-        if (h % 100 == 0)
-          fprintf(stderr, "%.4d x %.4d\b\b\b\b\b\b\b\b\b\b\b", w, h);
+        if (h % 100 == 0) printf("%.4d x %.4d\b\b\b\b\b\b\b\b\b\b\b", w, h);
         if ((srcBuf = (unsigned char *)malloc(w * h * 4)) == NULL)
           THROW("Memory allocation failure");
         if (!alloc || doYUV) {
@@ -680,11 +662,11 @@ static void bufSizeTest(void)
       }
     }
   }
-  fprintf(stderr, "Done.      \n");
+  printf("Done.      \n");
 
 bailout:
-  free(srcBuf);
-  tjFree(dstBuf);
+  if (srcBuf) free(srcBuf);
+  if (dstBuf) tjFree(dstBuf);
   if (handle) tjDestroy(handle);
 }
 
@@ -777,8 +759,7 @@ static int cmpBitmap(unsigned char *buf, int width, int pitch, int height,
 static int doBmpTest(const char *ext, int width, int align, int height, int pf,
                      int flags)
 {
-  const size_t filenameSize = 80;
-  char filename[filenameSize], *md5sum, md5buf[65];
+  char filename[80], *md5sum, md5buf[65];
   int ps = tjPixelSize[pf], pitch = PAD(width * ps, align), loadWidth = 0,
     loadHeight = 0, retval = 0, pixelFormat = pf;
   unsigned char *buf = NULL;
@@ -796,14 +777,8 @@ static int doBmpTest(const char *ext, int width, int align, int height, int pf,
     THROW("Could not allocate memory");
   initBitmap(buf, width, pitch, height, pf, flags);
 
-#if defined(ANDROID) && defined(GTEST)
-  snprintf(filename, filenameSize, "/sdcard/test_bmp_%s_%d_%s.%s",
-           pixFormatStr[pf], align, (flags & TJFLAG_BOTTOMUP) ? "bu" : "td",
-           ext);
-#else
-  snprintf(filename, filenameSize, "test_bmp_%s_%d_%s.%s", pixFormatStr[pf],
-           align, (flags & TJFLAG_BOTTOMUP) ? "bu" : "td", ext);
-#endif
+  snprintf(filename, 80, "test_bmp_%s_%d_%s.%s", pixFormatStr[pf], align,
+           (flags & TJFLAG_BOTTOMUP) ? "bu" : "td", ext);
   TRY_TJ(tjSaveImage(filename, buf, width, pitch, height, pf, flags));
   md5sum = MD5File(filename, md5buf);
   if (strcasecmp(md5sum, md5ref))
@@ -814,11 +789,11 @@ static int doBmpTest(const char *ext, int width, int align, int height, int pf,
                          flags)) == NULL)
     THROW_TJ();
   if (width != loadWidth || height != loadHeight) {
-    fprintf(stderr, "\n   Image dimensions of %s are bogus\n", filename);
+    printf("\n   Image dimensions of %s are bogus\n", filename);
     retval = -1;  goto bailout;
   }
   if (!cmpBitmap(buf, width, pitch, height, pf, flags, 0)) {
-    fprintf(stderr, "\n   Pixel data in %s is bogus\n", filename);
+    printf("\n   Pixel data in %s is bogus\n", filename);
     retval = -1;  goto bailout;
   }
   if (pf == TJPF_GRAY) {
@@ -829,7 +804,7 @@ static int doBmpTest(const char *ext, int width, int align, int height, int pf,
       THROW_TJ();
     pitch = PAD(width * tjPixelSize[pf], align);
     if (!cmpBitmap(buf, width, pitch, height, pf, flags, 1)) {
-      fprintf(stderr, "\n   Converting %s to RGB failed\n", filename);
+      printf("\n   Converting %s to RGB failed\n", filename);
       retval = -1;  goto bailout;
     }
 
@@ -840,7 +815,7 @@ static int doBmpTest(const char *ext, int width, int align, int height, int pf,
       THROW_TJ();
     pitch = PAD(width * tjPixelSize[pf], align);
     if (!cmpBitmap(buf, width, pitch, height, pf, flags, 1)) {
-      fprintf(stderr, "\n   Converting %s to CMYK failed\n", filename);
+      printf("\n   Converting %s to CMYK failed\n", filename);
       retval = -1;  goto bailout;
     }
   }
@@ -857,15 +832,14 @@ static int doBmpTest(const char *ext, int width, int align, int height, int pf,
        pixelFormat != TJPF_BGR) ||
       (pf != TJPF_GRAY && !strcasecmp(ext, "ppm") &&
        pixelFormat != TJPF_RGB)) {
-    fprintf(stderr,
-            "\n   tjLoadImage() returned unexpected pixel format: %s\n",
-            pixFormatStr[pixelFormat]);
+    printf("\n   tjLoadImage() returned unexpected pixel format: %s\n",
+           pixFormatStr[pixelFormat]);
     retval = -1;
   }
   unlink(filename);
 
 bailout:
-  tjFree(buf);
+  if (buf) tjFree(buf);
   if (exitStatus < 0) return exitStatus;
   return retval;
 }
@@ -877,251 +851,37 @@ static int bmpTest(void)
 
   for (align = 1; align <= 8; align *= 2) {
     for (format = 0; format < TJ_NUMPF; format++) {
-      fprintf(stderr, "%s Top-Down BMP (row alignment = %d bytes)  ...  ",
-              pixFormatStr[format], align);
+      printf("%s Top-Down BMP (row alignment = %d bytes)  ...  ",
+             pixFormatStr[format], align);
       if (doBmpTest("bmp", width, align, height, format, 0) == -1)
         return -1;
-      fprintf(stderr, "OK.\n");
+      printf("OK.\n");
 
-      fprintf(stderr, "%s Top-Down PPM (row alignment = %d bytes)  ...  ",
-              pixFormatStr[format], align);
+      printf("%s Top-Down PPM (row alignment = %d bytes)  ...  ",
+             pixFormatStr[format], align);
       if (doBmpTest("ppm", width, align, height, format,
                     TJFLAG_BOTTOMUP) == -1)
         return -1;
-      fprintf(stderr, "OK.\n");
+      printf("OK.\n");
 
-      fprintf(stderr, "%s Bottom-Up BMP (row alignment = %d bytes)  ...  ",
-              pixFormatStr[format], align);
+      printf("%s Bottom-Up BMP (row alignment = %d bytes)  ...  ",
+             pixFormatStr[format], align);
       if (doBmpTest("bmp", width, align, height, format, 0) == -1)
         return -1;
-      fprintf(stderr, "OK.\n");
+      printf("OK.\n");
 
-      fprintf(stderr, "%s Bottom-Up PPM (row alignment = %d bytes)  ...  ",
-              pixFormatStr[format], align);
+      printf("%s Bottom-Up PPM (row alignment = %d bytes)  ...  ",
+             pixFormatStr[format], align);
       if (doBmpTest("ppm", width, align, height, format,
                     TJFLAG_BOTTOMUP) == -1)
         return -1;
-      fprintf(stderr, "OK.\n");
+      printf("OK.\n");
     }
   }
 
   return 0;
 }
 
-
-#ifdef GTEST
-static void initTJUnitTest(int yuv, int noyuvpad, int autoalloc)
-{
-  doYUV = yuv ? 1 : 0;
-  pad = noyuvpad ? 1 : 4;
-  alloc = autoalloc ? 1 : 0;
-
-  exitStatus = 0;
-}
-
-
-int testBmp(int yuv, int noyuvpad, int autoalloc)
-{
-  initTJUnitTest(yuv, noyuvpad, autoalloc);
-
-  return bmpTest();
-}
-
-
-int testThreeByte444(int yuv, int noyuvpad, int autoalloc)
-{
-  initTJUnitTest(yuv, noyuvpad, autoalloc);
-
-  doTest(35, 39, _3byteFormats, 2, TJSAMP_444, "test");
-  return exitStatus;
-}
-
-
-int testFourByte444(int yuv, int noyuvpad, int autoalloc)
-{
-  initTJUnitTest(yuv, noyuvpad, autoalloc);
-
-  int num4bf = doYUV ? 4 : 5;
-  doTest(39, 41, _4byteFormats, num4bf, TJSAMP_444, "test");
-  return exitStatus;
-}
-
-
-int testThreeByte422(int yuv, int noyuvpad, int autoalloc)
-{
-  initTJUnitTest(yuv, noyuvpad, autoalloc);
-
-  doTest(41, 35, _3byteFormats, 2, TJSAMP_422, "test");
-  return exitStatus;
-}
-
-
-int testFourByte422(int yuv, int noyuvpad, int autoalloc)
-{
-  initTJUnitTest(yuv, noyuvpad, autoalloc);
-
-  int num4bf = doYUV ? 4 : 5;
-  doTest(35, 39, _4byteFormats, num4bf, TJSAMP_422, "test");
-  return exitStatus;
-}
-
-
-int testThreeByte420(int yuv, int noyuvpad, int autoalloc)
-{
-  initTJUnitTest(yuv, noyuvpad, autoalloc);
-
-  doTest(39, 41, _3byteFormats, 2, TJSAMP_420, "test");
-  return exitStatus;
-}
-
-
-int testFourByte420(int yuv, int noyuvpad, int autoalloc)
-{
-  initTJUnitTest(yuv, noyuvpad, autoalloc);
-
-  int num4bf = doYUV ? 4 : 5;
-  doTest(41, 35, _4byteFormats, num4bf, TJSAMP_420, "test");
-  return exitStatus;
-}
-
-
-int testThreeByte440(int yuv, int noyuvpad, int autoalloc)
-{
-  initTJUnitTest(yuv, noyuvpad, autoalloc);
-
-  doTest(35, 39, _3byteFormats, 2, TJSAMP_440, "test");
-  return exitStatus;
-}
-
-
-int testFourByte440(int yuv, int noyuvpad, int autoalloc)
-{
-  initTJUnitTest(yuv, noyuvpad, autoalloc);
-
-  int num4bf = doYUV ? 4 : 5;
-  doTest(39, 41, _4byteFormats, num4bf, TJSAMP_440, "test");
-  return exitStatus;
-}
-
-
-int testThreeByte411(int yuv, int noyuvpad, int autoalloc)
-{
-  initTJUnitTest(yuv, noyuvpad, autoalloc);
-
-  doTest(41, 35, _3byteFormats, 2, TJSAMP_411, "test");
-  return exitStatus;
-}
-
-
-int testFourByte411(int yuv, int noyuvpad, int autoalloc)
-{
-  initTJUnitTest(yuv, noyuvpad, autoalloc);
-
-  int num4bf = doYUV ? 4 : 5;
-  doTest(35, 39, _4byteFormats, num4bf, TJSAMP_411, "test");
-  return exitStatus;
-}
-
-
-int testOnlyGray(int yuv, int noyuvpad, int autoalloc)
-{
-  initTJUnitTest(yuv, noyuvpad, autoalloc);
-
-  doTest(39, 41, _onlyGray, 1, TJSAMP_GRAY, "test");
-  return exitStatus;
-}
-
-
-int testThreeByteGray(int yuv, int noyuvpad, int autoalloc)
-{
-  initTJUnitTest(yuv, noyuvpad, autoalloc);
-
-  doTest(41, 35, _3byteFormats, 2, TJSAMP_GRAY, "test");
-  return exitStatus;
-}
-
-
-int testFourByteGray(int yuv, int noyuvpad, int autoalloc)
-{
-  initTJUnitTest(yuv, noyuvpad, autoalloc);
-
-  doTest(35, 39, _4byteFormats, 4, TJSAMP_GRAY, "test");
-  return exitStatus;
-}
-
-
-int testBufSize(int yuv, int noyuvpad, int autoalloc)
-{
-  initTJUnitTest(yuv, noyuvpad, autoalloc);
-
-  bufSizeTest();
-  return exitStatus;
-}
-
-
-int testYUVOnlyRGB444(int noyuvpad, int autoalloc)
-{
-  initTJUnitTest(1, noyuvpad, autoalloc);
-
-  doTest(48, 48, _onlyRGB, 1, TJSAMP_444, "test_yuv0");
-  return exitStatus;
-}
-
-
-int testYUVOnlyRGB422(int noyuvpad, int autoalloc)
-{
-  initTJUnitTest(1, noyuvpad, autoalloc);
-
-  doTest(48, 48, _onlyRGB, 1, TJSAMP_422, "test_yuv0");
-  return exitStatus;
-}
-
-
-int testYUVOnlyRGB420(int noyuvpad, int autoalloc)
-{
-  initTJUnitTest(1, noyuvpad, autoalloc);
-
-  doTest(48, 48, _onlyRGB, 1, TJSAMP_420, "test_yuv0");
-  return exitStatus;
-}
-
-
-int testYUVOnlyRGB440(int noyuvpad, int autoalloc)
-{
-  initTJUnitTest(1, noyuvpad, autoalloc);
-
-  doTest(48, 48, _onlyRGB, 1, TJSAMP_440, "test_yuv0");
-  return exitStatus;
-}
-
-
-int testYUVOnlyRGB411(int noyuvpad, int autoalloc)
-{
-  initTJUnitTest(1, noyuvpad, autoalloc);
-
-  doTest(48, 48, _onlyRGB, 1, TJSAMP_411, "test_yuv0");
-  return exitStatus;
-}
-
-
-int testYUVOnlyRGBGray(int noyuvpad, int autoalloc)
-{
-  initTJUnitTest(1, noyuvpad, autoalloc);
-
-  doTest(48, 48, _onlyRGB, 1, TJSAMP_GRAY, "test_yuv0");
-  return exitStatus;
-}
-
-
-int testYUVOnlyGrayGray(int noyuvpad, int autoalloc)
-{
-  initTJUnitTest(1, noyuvpad, autoalloc);
-
-  doTest(48, 48, _onlyGray, 1, TJSAMP_GRAY, "test_yuv0");
-  return exitStatus;
-}
-
-#else
 
 int main(int argc, char *argv[])
 {
@@ -1169,4 +929,3 @@ int main(int argc, char *argv[])
 
   return exitStatus;
 }
-#endif
