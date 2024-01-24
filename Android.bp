@@ -292,6 +292,11 @@ cc_library {
         },
     },
     sdk_version: "current",
+    min_sdk_version: "apex_inherit",
+    apex_available: [
+        "com.android.mediaprovider",
+        "//apex_available:platform"
+    ],
 }
 
 // Build static library against the NDK
