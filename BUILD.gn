@@ -5,12 +5,15 @@
 # Do not use the targets in this file unless you need a certain libjpeg
 # implementation. Use the meta target //third_party:jpeg instead.
 
+import("//build/config/features.gni")
 import("//build/config/sanitizers/sanitizers.gni")
 if (current_cpu == "arm" || current_cpu == "arm64") {
   import("//build/config/arm.gni")
 }
 
-assert(!is_ios, "This is not used on iOS, don't drag it in unintentionally")
+assert(
+    use_blink,
+    "This is not used if blink is not enabled, don't drag it in unintentionally")
 
 source_set("libjpeg_headers") {
   sources = [
@@ -21,7 +24,6 @@ source_set("libjpeg_headers") {
     "jpeglib.h",
     "jpeglibmangler.h",
   ]
-  defines = [ "MANGLE_JPEG_NAMES" ]
 }
 
 if (current_cpu == "x86" || current_cpu == "x64") {
@@ -30,6 +32,11 @@ if (current_cpu == "x86" || current_cpu == "x64") {
   nasm_assemble("simd_asm") {
     defines = []
     include_dirs = [ "simd/nasm/" ]
+
+    inputs = [
+      "simd/nasm/jdct.inc",
+      "simd/nasm/jsimdext.inc",
+    ]
 
     if (current_cpu == "x86") {
       include_dirs += [ "simd/i386/" ]
@@ -138,6 +145,7 @@ if (current_cpu == "x86" || current_cpu == "x64") {
 static_library("simd") {
   include_dirs = [ "." ]
   deps = [ ":libjpeg_headers" ]
+  defines = [ "MANGLE_JPEG_NAMES" ]
 
   if (current_cpu == "x86") {
     deps += [ ":simd_asm" ]
@@ -175,7 +183,7 @@ static_library("simd") {
       ]
     }
 
-    defines = [ "NEON_INTRINSICS" ]
+    defines += [ "NEON_INTRINSICS" ]
 
     configs -= [ "//build/config/compiler:default_optimization" ]
     configs += [ "//build/config/compiler:optimize_speed" ]
@@ -190,6 +198,7 @@ static_library("simd") {
 
 config("libjpeg_config") {
   include_dirs = [ "." ]
+  defines = [ "MANGLE_JPEG_NAMES" ]
 }
 
 static_library("libjpeg") {
@@ -248,6 +257,7 @@ static_library("libjpeg") {
   defines = [
     "WITH_SIMD",
     "NO_GETENV",
+    "NO_PUTENV",
   ]
 
   configs += [ ":libjpeg_config" ]
@@ -342,5 +352,9 @@ if (build_with_chromium) {
 
     configs -= [ "//build/config/compiler:chromium_code" ]
     configs += [ "//build/config/compiler:no_chromium_code" ]
+
+    if (is_win) {
+      cflags = [ "-U_CRT_SECURE_NO_DEPRECATE" ]
+    }
   }
 }
