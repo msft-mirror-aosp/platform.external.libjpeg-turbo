@@ -281,9 +281,6 @@ cc_library {
     host_supported: true,
     vendor_available: true,
     product_available: true,
-    vndk: {
-        enabled: true,
-    },
     defaults: ["libjpeg-defaults"],
     export_include_dirs: ["."],
     target: {
@@ -292,6 +289,11 @@ cc_library {
         },
     },
     sdk_version: "current",
+    min_sdk_version: "apex_inherit",
+    apex_available: [
+        "com.android.mediaprovider",
+        "//apex_available:platform"
+    ],
 }
 
 // Build static library against the NDK
