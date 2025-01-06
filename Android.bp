@@ -278,6 +278,7 @@ cc_defaults {
 // Build as a shared library.
 cc_library {
     name: "libjpeg",
+    afdo: true,
     host_supported: true,
     vendor_available: true,
     product_available: true,
