@@ -85,19 +85,3 @@
 #define BITS_IN_JSAMPLE  8      /* use 8 or 12 */
 #endif
 
-#undef C_ARITH_CODING_SUPPORTED
-#undef D_ARITH_CODING_SUPPORTED
-#undef WITH_SIMD
-
-#if BITS_IN_JSAMPLE == 8
-
-/* Support arithmetic encoding */
-/* #define C_ARITH_CODING_SUPPORTED 1 */
-
-/* Support arithmetic decoding */
-/* #define D_ARITH_CODING_SUPPORTED 1 */
-
-/* Use accelerated SIMD routines. */
-#define WITH_SIMD 1
-
-#endif

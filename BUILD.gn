@@ -168,12 +168,30 @@ if (current_cpu == "x86" || current_cpu == "x64") {
   }
 }
 
+config("libjpeg_simd_config") {
+  if (is_msan && (current_cpu == "x86" || current_cpu == "x64")) {
+    # MemorySanitizer doesn't support assembly code, so keep it disabled in x86
+    # and x64 MSan builds for now.
+  } else if (current_cpu == "x86" || current_cpu == "x64") {
+    defines = [ "WITH_SIMD" ]
+  } else if ((current_cpu == "arm" || current_cpu == "arm64") && arm_use_neon) {
+    defines = [
+      "NEON_INTRINSICS",
+      "WITH_SIMD",
+    ]
+  }
+}
+
 static_library("simd") {
   include_dirs = [ "." ]
   deps = [ ":libjpeg_headers" ]
   defines = [ "MANGLE_JPEG_NAMES" ]
+  configs += [ ":libjpeg_simd_config" ]
 
-  if (current_cpu == "x86") {
+  if (is_msan && (current_cpu == "x86" || current_cpu == "x64")) {
+    # MemorySanitizer doesn't support assembly code, so keep it disabled in x86
+    # and x64 MSan builds for now.
+  } else if (current_cpu == "x86") {
     deps += [ ":simd_asm" ]
     sources = [ "simd/i386/jsimd.c" ]
   } else if (current_cpu == "x64") {
@@ -209,12 +227,8 @@ static_library("simd") {
       ]
     }
 
-    defines += [ "NEON_INTRINSICS" ]
-
     configs -= [ "//build/config/compiler:default_optimization" ]
     configs += [ "//build/config/compiler:optimize_speed" ]
-  } else {
-    sources = [ "jsimd_none.c" ]
   }
 
   if (is_win) {
@@ -304,7 +318,6 @@ static_library("libjpeg16") {
   sources = libjpeg16_sources
 
   defines = [
-    "WITH_SIMD",
     "NO_GETENV",
     "NO_PUTENV",
     "BITS_IN_JSAMPLE=16",
@@ -320,7 +333,6 @@ static_library("libjpeg12") {
   sources = libjpeg12_sources
 
   defines = [
-    "WITH_SIMD",
     "NO_GETENV",
     "NO_PUTENV",
     "BITS_IN_JSAMPLE=12",
@@ -336,36 +348,30 @@ static_library("libjpeg") {
   sources = libjpeg_sources
 
   defines = [
-    "WITH_SIMD",
     "NO_GETENV",
     "NO_PUTENV",
   ]
 
-  configs += [ ":libjpeg_config" ]
+  configs += [
+    ":libjpeg_config",
+    ":libjpeg_simd_config",
+  ]
 
   public_configs = [ ":libjpeg_config" ]
   public_deps = [
     ":libjpeg_headers",
+  ]
+
+  deps = [
     ":libjpeg12",
     ":libjpeg16",
+    ":simd",
   ]
 
   if (current_cpu == "x86" || current_cpu == "x64") {
     # Avoid the 64K jpeg_nbits table.
     # Note: USE_CLZ_INTRINSIC is enabled by default for Arm (jpeg_nbits.h)
     defines += [ "USE_CLZ_INTRINSIC" ]
-  }
-
-  # MemorySanitizer doesn't support assembly code, so keep it disabled in x86
-  # and x64 MSan builds for now.
-  if (is_msan && (current_cpu == "x86" || current_cpu == "x64")) {
-    sources += [ "jsimd_none.c" ]
-  } else {
-    public_deps += [ ":simd" ]
-
-    if ((current_cpu == "arm" || current_cpu == "arm64") && arm_use_neon) {
-      defines += [ "NEON_INTRINSICS" ]
-    }
   }
 }
 
@@ -379,7 +385,6 @@ turbojpeg_ppm_sources = [
 static_library("turbojpeg_ppm16") {
   sources = turbojpeg_ppm_sources
   defines = [
-    "WITH_SIMD",
     "BMP_SUPPORTED",
     "PPM_SUPPORTED",
     "BITS_IN_JSAMPLE=16",
@@ -394,7 +399,6 @@ static_library("turbojpeg_ppm16") {
 static_library("turbojpeg_ppm12") {
   sources = turbojpeg_ppm_sources
   defines = [
-    "WITH_SIMD",
     "BMP_SUPPORTED",
     "PPM_SUPPORTED",
     "BITS_IN_JSAMPLE=12",
@@ -417,16 +421,20 @@ static_library("turbojpeg") {
   ]
 
   defines = [
-    "WITH_SIMD",
     "BMP_SUPPORTED",
     "PPM_SUPPORTED",
   ]
 
-  configs += [ ":libjpeg_config" ]
+  configs += [
+    ":libjpeg_config",
+    ":libjpeg_simd_config",
+  ]
 
   public_configs = [ ":libjpeg_config" ]
   public_deps = [
     ":libjpeg",
+  ]
+  deps = [
     ":turbojpeg_ppm12",
     ":turbojpeg_ppm16",
   ]
@@ -446,7 +454,6 @@ if (build_with_chromium) {
 
     defines = [
       "GTEST",
-      "WITH_SIMD",
       "BMP_SUPPORTED",
       "PPM_SUPPORTED",
       "BITS_IN_JSAMPLE=12",
@@ -489,7 +496,6 @@ if (build_with_chromium) {
 
     defines = [
       "GTEST",
-      "WITH_SIMD",
       "BMP_SUPPORTED",
       "PPM_SUPPORTED",
     ]
@@ -500,7 +506,10 @@ if (build_with_chromium) {
     ]
 
     configs -= [ "//build/config/compiler:chromium_code" ]
-    configs += [ "//build/config/compiler:no_chromium_code" ]
+    configs += [
+      ":libjpeg_simd_config",
+      "//build/config/compiler:no_chromium_code",
+    ]
 
     if (is_win) {
       cflags = [ "-U_CRT_SECURE_NO_DEPRECATE" ]
