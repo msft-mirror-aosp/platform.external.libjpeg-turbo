@@ -128,7 +128,10 @@ cc_defaults {
                 "simd/arm/jidctred-neon.c",
                 "simd/arm/jquanti-neon.c",
             ],
-            cflags: ["-DNEON_INTRINSICS", "-mfpu=neon"],
+            cflags: [
+                "-DNEON_INTRINSICS",
+                "-mfpu=neon",
+            ],
             local_include_dirs: ["simd/arm"],
         },
         arm64: {
@@ -293,7 +296,7 @@ cc_library {
     min_sdk_version: "apex_inherit",
     apex_available: [
         "com.android.mediaprovider",
-        "//apex_available:platform"
+        "//apex_available:platform",
     ],
 }
 
@@ -303,6 +306,7 @@ cc_library_static {
     defaults: ["libjpeg-defaults"],
     export_include_dirs: ["."],
     sdk_version: "17",
+    product_available: true,
 }
 
 // Definition for TJBench
